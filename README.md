@@ -15,7 +15,9 @@ Click the button below to start your environment:
 
 [![Open in Ona](https://gitpod.io/button/open-in-gitpod.svg)](https://app.gitpod.io/#https://github.com/gitpod-samples/vnc)
 
-Or, you can also fork this repository or copy the [.devcontainer](./devcontainer) folder to your own repo.
+Then open port 5901 from the "Environment" tab in Ona. You can also launch your env in VSCode (desktop client) for localhost port forwarding and then open the 5091 port from the PORTS tab in VSCode.
+
+Note: You can also fork this repository or copy the [.devcontainer](./devcontainer) folder to your own repo.
 
 ## Desktop Details
 - Display: DISPLAY variable defaults to `:1` inside the container
