@@ -1,0 +1,9 @@
+services:
+    KasmVNC:
+        name: Kasm Xfce4 VNC
+        commands:
+            ready: pgrep xfdesktop 1>/dev/null
+            start: vnc
+            stop: vncserver -kill :1
+        triggeredBy:
+          - postEnvironmentStart

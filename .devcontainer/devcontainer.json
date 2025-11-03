@@ -15,9 +15,9 @@
     },
     "runArgs": [ "--shm-size=2gb" ], // Increase /dev/shm size for GUI applications that need it
     "privileged": true,
-    "postStartCommand": {
-        "vnc": "sudo service dbus start && cd $HOME && vncserver -disableBasicAuth -alwaysshared"
-    },
+    // "postStartCommand": {
+    //     "vnc": "vnc"
+    // },
     // Mount the Docker socket from the host to enable Docker-in-Docker functionality
     "mounts": [
         {
@@ -27,5 +27,10 @@
         }
     ],
     "forwardPorts": [ 5901 ],
-    "portsAttributes": {"5901": {"label": "KasmVNC"}}
+    "portsAttributes": {
+        "5901": {
+            "label": "KasmVNC",
+            "onAutoForward": "openPreview"
+        }
+    }
 }

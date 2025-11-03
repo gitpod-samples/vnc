@@ -53,6 +53,15 @@ network:
     require_ssl: false
 EOF
 
+    sudo tee -a /usr/bin/vnc <<'BASH'
+#!/bin/bash
+set -eux
+sudo service dbus start
+cd $HOME
+vncserver -disableBasicAuth -alwaysshared
+BASH
+    sudo chmod +x /usr/bin/vnc
+
 SCRIPT
 
 
