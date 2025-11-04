@@ -6,4 +6,4 @@ services:
             start: vnc
             stop: vncserver -kill :1
         triggeredBy:
-          - postEnvironmentStart
+          - postDevcontainerStart
