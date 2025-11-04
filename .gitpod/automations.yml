@@ -1,9 +1,42 @@
 services:
     KasmVNC:
-        name: Kasm Xfce4 VNC
+        name: Kasm Xfce4 VNC Desktop
+        description: Runs a fully featured Linux Desktop Environment, including Google Chrome
         commands:
-            ready: pgrep xfdesktop 1>/dev/null
-            start: vnc
-            stop: vncserver -kill :1
+            ready: until pgrep xfdesktop 1>/dev/null; do sleep 1; done
+            start: |
+                addr=$(gitpod env port open 5901 -n "VNC Desktop")
+
+                cat <<'EOF'
+                ####################################
+                ### Kasm VNC Desktop is running! ###
+                ###                              ###
+                - To access the desktop, open the port 5901 from the "Environment" tab in Ona.
+                - Or, open the Ona env in a local IDE like VSCode and use the forwarded port http://localhost:5901
+                ###                              ###
+                ####################################
+                EOF
+
+                vnc
+            stop: vncserver -kill :1; sudo service dbus stop
         triggeredBy:
           - postDevcontainerStart
+    
+    intelij-idea:
+        name: Run IntelliJ IDEA
+        description: Runs IntelliJ IDEA
+        commands:
+            ready: until pgrep idea 1>/dev/null; do sleep 1; done
+            start: |
+                download_url="https://download.jetbrains.com/idea/ideaIU-2025.2.4.tar.gz"
+                idea_dir="$HOME/idea"
+                if ! test -e "$idea_dir/bin/idea"; then
+                    mkdir -p "$idea_dir"
+                    curl -L "$download_url" -o /tmp/idea.tar.gz
+                    tar -xpf /tmp/idea.tar.gz --strip-components=1 -C "$idea_dir"
+                    rm /tmp/idea.tar.gz
+                fi
+                "$idea_dir/bin/idea"
+            stop: pkill idea
+        triggeredBy:
+          - manual

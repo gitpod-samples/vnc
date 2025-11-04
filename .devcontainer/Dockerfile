@@ -1,15 +1,36 @@
 FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
-RUN cd /tmp \
-&& curl -LO https://github.com/kasmtech/KasmVNC/releases/download/v1.4.0/kasmvncserver_noble_1.4.0_amd64.deb \
-&& apt-get update && apt-get install -yq ./kasm*.deb && rm kasm*.deb \
-&& apt-get install -yq --no-install-recommends dbus dbus-x11 gnome-keyring xfce4 xfce4-terminal xdg-utils x11-xserver-utils
-
 ENV DISPLAY=:1
 ARG USERNAME=vscode
 ARG HOMEPATH=/home/$USERNAME
 
+RUN cd /tmp \
+&& curl -LO https://github.com/kasmtech/KasmVNC/releases/download/v1.4.0/kasmvncserver_noble_1.4.0_amd64.deb \
+&& apt-get update && apt-get install -yq ./kasm*.deb && rm kasm*.deb \
+&& apt-get install -yq --no-install-recommends dbus dbus-x11 gnome-keyring xfce4 xfce4-terminal xdg-utils x11-xserver-utils
 RUN adduser $USERNAME ssl-cert
+
+
+# Optional: Install Browser (Chrome)
+# chrome and basic render font
+# misc deps for electron and puppeteer to run
+RUN cd /tmp && glink="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" \
+	&& wget -q "$glink" \
+	&& apt-get install -yq --no-install-recommends libasound2-dev libgtk-3-dev libnss3-dev \
+	fonts-noto fonts-noto-cjk ./"${glink##*/}" \
+	\
+	# OLD: && ln -srf /usr/bin/chromium /usr/bin/google-chrome
+	# OLD: To make ungoogled_chromium discoverable by tools like flutter
+	&& ln -srf /usr/bin/google-chrome /usr/bin/chromium \
+	\
+	# Extra chrome tweaks
+	## Disables welcome screen
+	&& t="$HOMEPATH/.config/google-chrome/First Run" && sudo -u $USERNAME mkdir -p "${t%/*}" && sudo -u $USERNAME touch "$t" \
+	## Disables default browser prompt
+	&& t="/etc/opt/chrome/policies/managed/managed_policies.json" && mkdir -p "${t%/*}" && printf '{ "%s": %s }\n' DefaultBrowserSettingEnabled false > "$t"
+# For Qt WebEngine on docker
+ENV QTWEBENGINE_DISABLE_SANDBOX 1
+
 
 USER $USERNAME
 SHELL ["/bin/bash", "-ic"]
@@ -53,36 +74,13 @@ network:
     require_ssl: false
 EOF
 
-    sudo tee -a /usr/bin/vnc <<'BASH'
+    sudo tee /usr/bin/vnc <<'BASH'
 #!/bin/bash
-set -eux
-sudo service dbus start
+set -eu
+sudo service dbus start >> /tmp/vnc.log
 cd $HOME
-vncserver -disableBasicAuth -alwaysshared
+vncserver -disableBasicAuth -alwaysshared -SecurityTypes None -fg $@ >> /tmp/vnc.log 2>&1
 BASH
     sudo chmod +x /usr/bin/vnc
 
 SCRIPT
-
-
-# Optional: Install Browser (Chrome)
-# chrome and basic render font
-# misc deps for electron and puppeteer to run
-USER root
-RUN cd /tmp && glink="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" \
-	&& wget -q "$glink" \
-	&& apt-get install -yq --no-install-recommends libasound2-dev libgtk-3-dev libnss3-dev \
-	fonts-noto fonts-noto-cjk ./"${glink##*/}" \
-	\
-	# OLD: && ln -srf /usr/bin/chromium /usr/bin/google-chrome
-	# OLD: To make ungoogled_chromium discoverable by tools like flutter
-	&& ln -srf /usr/bin/google-chrome /usr/bin/chromium \
-	\
-	# Extra chrome tweaks
-	## Disables welcome screen
-	&& t="$HOMEPATH/.config/google-chrome/First Run" && sudo -u $USERNAME mkdir -p "${t%/*}" && sudo -u $USERNAME touch "$t" \
-	## Disables default browser prompt
-	&& t="/etc/opt/chrome/policies/managed/managed_policies.json" && mkdir -p "${t%/*}" && printf '{ "%s": %s }\n' DefaultBrowserSettingEnabled false > "$t"
-
-# For Qt WebEngine on docker
-ENV QTWEBENGINE_DISABLE_SANDBOX 1
