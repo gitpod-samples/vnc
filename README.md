@@ -1,12 +1,13 @@
 # VNC for Ona
 
-An optimized VNC setup for Ona Environments. It's based on Ubuntu 24.04 with an XFCE desktop, KasmVNC server, and Google Chrome preinstalled. It is tailored for Ona workflows that need a lightweight yet complete remote desktop accessible from any modern browser.
+An optimized VNC setup for Ona Environments. It's based on Ubuntu 24.04 with an XFCE desktop, KasmVNC server, and Google Chrome preinstalled. It also has IntelliJ Idea if you want to run that. It is tailored for Ona workflows that need a lightweight yet complete remote desktop accessible from any modern browser.
 
 ## What's Included
 - Ubuntu 24.04 base image wrapped in the devcontainers/base toolchain
 - KasmVNC server configured on port 5901 with WebSocket access
 - XFCE desktop session launched through `vncserver`
 - Google Chrome available system-wide (also aliased to `chromium` for compatibility)
+- IntelliJ Idea (on-demand)
 - Docker-in-Docker feature enabled so Docker CLI commands work inside the container
 
 ## Quick Start
